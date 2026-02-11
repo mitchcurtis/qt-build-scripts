@@ -8,8 +8,14 @@ set -o pipefail
 # Disable screen lock.
 gsettings set org.gnome.desktop.session idle-delay 0
 
-# Escape from Vim.
+# Enable the CRB repository (contains most -devel and -static packages).
+sudo dnf config-manager --set-enabled crb
+# Enable EPEL (contains ninja-build and extra libraries).
 sudo dnf install epel-release -y
+# Refresh the cache.
+sudo dnf makecache
+
+# Escape from Vim.
 sudo dnf install gedit -y
 git config --global core.editor "gedit"
 
