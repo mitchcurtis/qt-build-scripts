@@ -15,9 +15,9 @@ git config --global core.editor "gedit"
 
 # We need this to clone the provisioning scripts.
 qtSourceDir=$(realpath "$1" 2>/dev/null || echo "$1")
-rhelProvisioningScriptsDir=¨$qtSourceDir/coin/provisioning/qtci-linux-RHEL-10.0-x86_64"
+rhelProvisioningScriptsDir="$qtSourceDir/coin/provisioning/qtci-linux-RHEL-10.0-x86_64"
 
-usageExample=¨Usage example: setup-rocky-linux.sh ~/dev/qt-dev¨
+usageExample="Usage example: setup-rocky-linux.sh ~/dev/qt-dev"
 
 # Validate arguments.
 if [ -z "$1" ]; then
@@ -32,6 +32,8 @@ if [ -z "$rhelProvisioningScriptsDir" ]; then
     echo "$usageExample"
     exit 1
 fi
+
+cd $rhelProvisioningScriptsDir
 
 01-disable_net_lso.sh
 
