@@ -5,6 +5,35 @@
 set -e
 set -o pipefail
 
+# We need this to clone the provisioning scripts.
+qtSourceDir=$(realpath "$1" 2>/dev/null || echo "$1")
+rhelProvisioningScriptsDir="$qtSourceDir/coin/provisioning/qtci-linux-RHEL-10.0-x86_64"
+
+usageExample="Usage example: setup-rocky-linux.sh ~/dev/qt-dev"
+
+# Validate arguments.
+if [ -z "$1" ]; then
+    echo "Error: qtSourceDir argument not supplied."
+    echo "$usageExample"
+    exit 1
+fi
+
+# Check that provisioning scripts exist.
+if [ -z "$rhelProvisioningScriptsDir" ]; then
+    echo "Error: RHEL provisioning scripts directory doesn't exist: $rhelProvisioningScriptsDir"
+    echo "$usageExample"
+    exit 1
+fi
+
+# Check if current user is 'qt' (the scripts we call require this).
+if [ "$USER" != "qt" ]; then
+    echo "Error: this script must be run as the 'qt' user, but the current user is: '$USER'"
+    exit 1
+fi
+
+# Print commands so that if one of the many scripts fail, we know which one it was.
+set -x
+
 # Disable screen lock.
 gsettings set org.gnome.desktop.session idle-delay 0
 
@@ -18,26 +47,6 @@ sudo dnf makecache
 # Escape from Vim.
 sudo dnf install gedit -y
 git config --global core.editor "gedit"
-
-# We need this to clone the provisioning scripts.
-qtSourceDir=$(realpath "$1" 2>/dev/null || echo "$1")
-rhelProvisioningScriptsDir="$qtSourceDir/coin/provisioning/qtci-linux-RHEL-10.0-x86_64"
-
-usageExample="Usage example: setup-rocky-linux.sh ~/dev/qt-dev"
-
-# Validate arguments.
-if [ -z "$1" ]; then
-    echo "qtSourceDir argument not supplied"
-    echo "$usageExample"
-    exit 1
-fi
-
-# Check that provisioning scripts exist.
-if [ -z "$rhelProvisioningScriptsDir" ]; then
-    echo "RHEL provisioning scripts directory doesn't exist: $rhelProvisioningScriptsDir"
-    echo "$usageExample"
-    exit 1
-fi
 
 cd $rhelProvisioningScriptsDir
 
