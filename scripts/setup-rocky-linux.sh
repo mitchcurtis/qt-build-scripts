@@ -1,11 +1,38 @@
 #! /bin/bash
 
 # This is designed to create a testing environment as close to linux-RHEL-10.0-x86_64 as possible.
+#
+# I used Boxes because it seems to be easier to get everything set up than VirtualBox.
+#
+# I'd recommend:
+# - 4 CPUs (otherwise Boxes/the VM has issues with my AMD CPU)
+# - At least 8 GB ram
+# - At least 40 GB disk space (vcpkg builds take up a lot of space)
+#
+# I also needed to limit ninja to 2 cores when building protobuf to prevent the VM from freezing:
+#
+# diff --git a/coin/provisioning/common/unix/install_protobuf.sh b/coin/provisioning/common/unix/install_protobuf.sh
+# index 1f4ee37a..8d9be187 100755
+# --- a/coin/provisioning/common/unix/install_protobuf.sh
+# +++ b/coin/provisioning/common/unix/install_protobuf.sh
+# @@ -89,8 +89,10 @@ cmake "$targetDir" -G"Ninja Multi-Config" \
+#      -DCMAKE_CONFIGURATION_TYPES="Release;Debug;RelWithDebugInfo" \
+#      -DCMAKE_CROSS_CONFIGS=all \
+#      -DCMAKE_DEFAULT_CONFIGS=all
+# -ninja all:all
+# -sudo env "PATH=$PATH" ninja install:all
+# +# Limit build to 2 cores to prevent VM freeze
+# +ninja -j 2 all:all
+# +# Limit install to 2 cores
+# +sudo env "PATH=$PATH" ninja -j 2 install:all
+#  
+# SetEnvVar "protobuf_ROOT" "$installPrefix"
+ 
+
 
 set -e
 set -o pipefail
 
-# We need this to clone the provisioning scripts.
 qtSourceDir=$(realpath "$1" 2>/dev/null || echo "$1")
 rhelProvisioningScriptsDir="$qtSourceDir/coin/provisioning/qtci-linux-RHEL-10.0-x86_64"
 
@@ -52,6 +79,10 @@ cd $rhelProvisioningScriptsDir
 
 # Make all .sh files executable.
 chmod +x *.sh
+
+# Ignore errors in the scripts we call, otherwise they'll fail when
+# trying to create directories that already exist, for example.
+set +e
 
 ./01-disable_net_lso.sh
 
