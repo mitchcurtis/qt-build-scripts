@@ -136,8 +136,11 @@ set +e
 
 #51-openapi.sh
 
-./60-install_protobuf.sh
-./61-install_grpc.sh
+# These take up a huge amount of disk space.
+# Note: haven't yet tried the script with these disabled.
+#./60-install_protobuf.sh
+#./61-install_grpc.sh
+
 ./70-install_dwz.sh
 
 # Not needed since we´re running our own VM.
